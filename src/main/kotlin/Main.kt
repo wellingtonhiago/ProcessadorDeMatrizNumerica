@@ -5,7 +5,10 @@ fun main() {
     val (rows2, cols2) = readNums()
     val matrix2 = List(rows2) { readNums() }
 
-    if (rows1 != rows2 || cols1 != cols2) { print("ERROR"); return }
+    if (rows1 != rows2 || cols1 != cols2) {
+        print("ERROR")
+        return
+    }
 
     for (y in 0 until rows1) {
         for (x in 0 until cols1) {
