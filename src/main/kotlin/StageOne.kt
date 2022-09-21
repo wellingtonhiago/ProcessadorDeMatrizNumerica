@@ -1,5 +1,5 @@
 fun main() {
-    val (rows1, cols1) = readNums()
+    val (rows1, cols1) = readNums()  // readNums é uma função no do arquivo Funcoes
     val matrix1 = List(rows1) { readNums() }
 
     val (rows2, cols2) = readNums()
@@ -17,5 +17,3 @@ fun main() {
         println()
     }
 }
-
-fun readNums() = readln().split(" ").map { it.toInt() }

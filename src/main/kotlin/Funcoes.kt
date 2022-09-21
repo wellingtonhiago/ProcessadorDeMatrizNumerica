@@ -1,0 +1,1 @@
+fun readNums() = readln().split(" ").map { it.toInt() }
