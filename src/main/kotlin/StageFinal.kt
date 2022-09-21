@@ -1,23 +1,22 @@
+import kotlin.math.pow
+
 class Matrix(private val rows: Int, private val cols: Int, fromCli: Boolean = false) {
     private val matrix: List<MutableList<Double>>
+
     init {
         matrix = if (!fromCli) List(rows) { MutableList(cols) { 0.0 } }
         else List(rows) { readln().split(" ").map { it.toDouble() }.toMutableList() }
     }
-
     operator fun get(row: Int, col: Int) = matrix[row][col]
     operator fun set(row: Int, col: Int, value: Double) = matrix[row].set(col, value)
     override fun toString() = matrix.joinToString("\n") { it.joinToString(" ") }
-
     private fun transform(action: (x: Int, y: Int) -> Double): Matrix {
         val newMatrix = Matrix(rows, cols)
         for (row in 0 until rows)
             for (col in 0 until cols)
                 newMatrix[row, col] = action(col, row)
-
         return newMatrix
     }
-
     fun transposeMain() = transform { x, y -> this[x, y] }
     fun transposeSide() = transform { x, y -> this[cols - 1 - x, rows - 1 - y] }
     fun transposeVertical() = transform { x, y -> this[y, cols - 1 - x] }
@@ -37,22 +36,24 @@ class Matrix(private val rows: Int, private val cols: Int, fromCli: Boolean = fa
         return newMatrix
     }
 
+    private fun getSubMatrix(m: List<MutableList<Double>>, col: Int, row: Int = 0): List<MutableList<Double>> =
+        m.map { it.toMutableList() }.toMutableList().apply { removeAt(row); forEach { it.removeAt(col) } }
+
     fun getDeterminant(m: List<MutableList<Double>> = matrix): Double {
         if (m.size == 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0]
+        return m.indices.fold(0.0) { acc, x -> acc + (-1.0).pow(x) * m[0][x] * getDeterminant(getSubMatrix(m, x)) }
+    }
 
-        var result = 0.0
-        for (col in m.indices) {
-            val subMatrix = m.map { it.toMutableList() }.toMutableList()
-                .apply { removeAt(0); forEach { it.removeAt(col) } }
-            result += (if (col % 2 == 0) 1 else -1) * m[0][col] * getDeterminant(subMatrix)
-        }
-        return result
+    fun inverse(): Matrix {
+        val multiplier = 1 / getDeterminant(matrix)
+        return transform { y, x -> multiplier * (-1.0).pow(y + x) * getDeterminant(getSubMatrix(matrix, x, y)) }
     }
 }
 
 class Processor {
     private fun printResult(result: Any) = println("The result is:\n$result")
-    val prefix = listOf("", "first ", "second ")
+
+    private val prefix = listOf("", "first ", "second ")
     private fun readMatrix(num: Int = 0): Matrix {
         print("Enter size of ${prefix[num]}matrix:")
         val (rows, cols) = readln().split(" ").map { it.toInt() }
@@ -88,6 +89,7 @@ class Processor {
         |3. Multiply matrices
         |4. Transpose matrix
         |5. Calculate a determinant
+        |6. Inverse matrix
         |0. Exit
         |Your choice:
         """.trimMargin()
@@ -101,6 +103,7 @@ class Processor {
                 3 -> printResult(readMatrix(1) * readMatrix(2))
                 4 -> transposeMatrix()
                 5 -> printResult(readMatrix().getDeterminant())
+                6 -> printResult(readMatrix().inverse())
                 else -> return
             }
             println()
